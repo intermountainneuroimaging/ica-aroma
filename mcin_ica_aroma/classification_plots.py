@@ -204,7 +204,8 @@ def classification_plot(myinput, outDir):
     plt.suptitle('Component Assessment', fontsize=20)
 
     # outtakes
-    plt.savefig(os.path.join(outDir, 'ICA_AROMA_component_assessment.pdf'),
+    os.makedirs(os.path.join(outDir, 'figures'), exist_ok=True)
+    plt.savefig(os.path.join(outDir, 'figures', 'ICA_AROMA_component_assessment.png'), format='png',
                 bbox_inches='tight')
 
     return
