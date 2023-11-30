@@ -116,7 +116,7 @@
         },
         "gear-builder": {
             "category": "analysis",
-            "image": "amhe4269/ica-aroma:0.4.5_inc0.0rc0"
+            "image": "amhe4269/ica-aroma:0.4.5_inc0.0rc1"
         },
         "license": "Apache-2.0"
     },
@@ -161,5 +161,5 @@
     "name": "ica-aroma",
     "source": "https://github.com/intermountainneuroimaging/ica-aroma",
     "url": "https://pubmed.ncbi.nlm.nih.gov/25770991/",
-    "version": "0.4.5_inc0.0rc0"
+    "version": "0.4.5_inc0.0rc1"
 }

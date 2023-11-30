@@ -66,21 +66,6 @@ def run(gear_options: dict, app_options: dict, gear_context: GearToolkitContext)
         run_error: any error encountered running the app. (0: no error)
     """
 
-    log.info("This is the beginning of the run file")
-
-    # psudocode
-    # 1. setup method for running in standard (FSL space) - check if exists?
-    #   a. identify func file
-    #   b. create fsl formatted motion file (check if par file exists?) - this should be the correct format?
-    #   c. set output directory (tempdir?) -
-    #   d. run ica-aroma
-    #   e. move relevant files to final destination
-    # 2. if func file is not standard space - look for reg or run it?
-    #   a. same as above - also pass reg mat and warp
-    # 3. reporting...
-    #   a. add component plot included with aroma + glass brain visualization
-    # 4. zip
-
     outfiles = []; run_error = 0
     for acq in app_options["runs"]:
 
@@ -133,14 +118,14 @@ def run(gear_options: dict, app_options: dict, gear_context: GearToolkitContext)
                 create_fsllike_motion(gear_options, app_options)
 
             # identify if dummy scans should be included
-            # orig_file = app_options["func_file"]
-            # if app_options['DropNonSteadyState']:
-            #     app_options['AcqDummyVolumes'] = fetch_dummy_volumes(app_options["acqid"], gear_context)
-            #     gear_options["aroma"]["params"]["in"] = _remove_volumes(app_options["func_file"], app_options['AcqDummyVolumes'])
-            #     gear_options["aroma"]["params"]["mc"] = _remove_timepoints(app_options["motion_file"], app_options['AcqDummyVolumes'])
-            # else:
-            #     gear_options["aroma"]["params"]["in"] = app_options["func_file"]
-            #     gear_options["aroma"]["params"]["mc"] = app_options["motion_file"]
+            orig_file = app_options["func_file"]
+            if app_options['DropNonSteadyState']:
+                app_options['AcqDummyVolumes'] = fetch_dummy_volumes(app_options["acqid"], gear_context)
+                gear_options["aroma"]["params"]["in"] = _remove_volumes(app_options["func_file"], app_options['AcqDummyVolumes'])
+                gear_options["aroma"]["params"]["mc"] = _remove_timepoints(app_options["motion_file"], app_options['AcqDummyVolumes'])
+            else:
+                gear_options["aroma"]["params"]["in"] = app_options["func_file"]
+                gear_options["aroma"]["params"]["mc"] = app_options["motion_file"]
 
         if input == "feat":
             gear_options["aroma"]["params"]["feat"] = app_options["featdir"]
@@ -165,26 +150,26 @@ def run(gear_options: dict, app_options: dict, gear_context: GearToolkitContext)
         command = deepcopy(gear_options["aroma"]["common_command"])
         command = build_command_list(command, gear_options["aroma"]["params"])
         app_options["command"] = " ".join(command)
-        # exec_command(
-        #     command,
-        #     environ=os.environ,
-        #     dry_run=gear_options["dry-run"],
-        #     shell=True,
-        #     cont_output=True,
-        # )
+        exec_command(
+            command,
+            environ=os.environ,
+            dry_run=gear_options["dry-run"],
+            shell=True,
+            cont_output=True,
+        )
 
-        # if app_options['DropNonSteadyState']:
-        #     # add volumes back to output file -- add dummy values to melodicmix (time series)
-        #     melodic_mix_file = op.join(app_options["analysis_dir"], "melodic.ica", "melodic_mix")
-        #     if os.path.exists(melodic_mix_file):
-        #         _add_volumes_melodicmix(melodic_mix_file, app_options['AcqDummyVolumes'])
-        #
-        #     for i in ["denoised_func_data_nonaggr.nii.gz", "denoised_func_data_aggr.nii.gz"]:
-        #         f = op.join(app_options["analysis_dir"], i)
-        #         if os.path.exists(f):
-        #             out = fname_presuffix(f, suffix='_cut')
-        #             shutil.move(f, out)
-        #             _add_volumes(orig_file, out, app_options['AcqDummyVolumes'])
+        if app_options['DropNonSteadyState']:
+            # add volumes back to output file -- add dummy values to melodicmix (time series)
+            melodic_mix_file = op.join(app_options["analysis_dir"], "melodic.ica", "melodic_mix")
+            if os.path.exists(melodic_mix_file):
+                _add_volumes_melodicmix(melodic_mix_file, app_options['AcqDummyVolumes'])
+
+            for i in ["denoised_func_data_nonaggr.nii.gz", "denoised_func_data_aggr.nii.gz"]:
+                f = op.join(app_options["analysis_dir"], i)
+                if os.path.exists(f):
+                    out = fname_presuffix(f, suffix='_cut')
+                    shutil.move(f, out)
+                    _add_volumes(orig_file, out, app_options['AcqDummyVolumes'])
 
 
         # make new denoised output file
@@ -210,10 +195,10 @@ def run(gear_options: dict, app_options: dict, gear_context: GearToolkitContext)
             return run_error
 
         # generate report and zip html
-        # report(gear_options, app_options)
-        #
-        # zip_htmls(gear_options["output-dir"], gear_options["destination-id"],
-        #           op.join(gear_options["aroma"]["params"]["out"]))
+        report(gear_options, app_options)
+
+        zip_htmls(gear_options["output-dir"], gear_options["destination-id"],
+                  op.join(gear_options["aroma"]["params"]["out"]))
 
     # move output files to path with destination-id
     for f in outfiles:

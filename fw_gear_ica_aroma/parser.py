@@ -69,12 +69,12 @@ def parse_config(
 
     # pull config settings
     gear_options["aroma"] = {
-        "common_command": ["python /flywheel/v0/mcin_ica_aroma/ICA_AROMA.py"],
+        "common_command": ["poetry run python /flywheel/v0/mcin_ica_aroma/ICA_AROMA.py"],
         "params": dict()
     }
 
     # unzip input files
-    # unzip_inputs(gear_options, gear_options["preproc_zipfile"])
+    unzip_inputs(gear_options, gear_options["preproc_zipfile"])
 
     if gear_options["additional_input"]:
         unzip_inputs(gear_options, gear_options["additional_input_zip"])
