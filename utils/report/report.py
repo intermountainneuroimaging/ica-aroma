@@ -212,7 +212,7 @@ def report(gear_options, app_options):
     # load html into python
     with open(report_file) as inf:
         txt = inf.read()
-        soup = bs4.BeautifulSoup(txt)
+        soup = bs4.BeautifulSoup(txt, "html.parser")
 
     for f in files:
         new_tag = soup.new_tag("img", src=f)
